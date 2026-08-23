@@ -15,8 +15,8 @@ const { chromium } = require('playwright');
 const { google } = require('googleapis');
 const XLSX = require('xlsx');
 
-const SPREADSHEET_ID = process.env.SPREADSHEET_ID || 'PASTE_YOUR_SPREADSHEET_ID_HERE';
-const FRED_API_KEY = process.env.FRED_API_KEY || 'PASTE_YOUR_FRED_KEY_HERE';
+const SPREADSHEET_ID = process.env.SPREADSHEET_ID || '1EU5HYT0agDE2Uh8C3pcwwOS_hz_8YVMvbFo6ORfocB4';
+const FRED_API_KEY = process.env.FRED_API_KEY || '762caffb55f13f5c3f27567ecaf8587c';
 
 const MATERIAL_SHEET = 'Material Costs';
 const LABOR_SHEET = 'Labor Costs';
