@@ -51,9 +51,12 @@ const SOURCES = {
 // -----------------------------------------------------------------------
 
 async function scrapeTradingEconomics(page, url, unit) {
-  await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-  // Give the page a moment for any client-side rendering to settle.
-  await page.waitForTimeout(1500);
+  // 'domcontentloaded' instead of 'networkidle': financial pages often
+  // have live tickers/ads/trackers that never let network activity fully
+  // stop, causing 'networkidle' to time out even on healthy pages.
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+  // Give the page a few seconds for client-side rendering to settle.
+  await page.waitForTimeout(3000);
 
   const bodyText = await page.textContent('body');
 
@@ -74,8 +77,8 @@ async function scrapeTradingEconomics(page, url, unit) {
 }
 
 async function scrapeFxEmpire(page, url) {
-  await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
-  await page.waitForTimeout(1500);
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
+  await page.waitForTimeout(3000);
 
   const bodyText = await page.textContent('body');
   const match = bodyText.match(/to\s+([\d,\.]+)\s+points/i) || bodyText.match(/([\d,\.]+)\s+points/i);
