@@ -6,8 +6,7 @@
 // "Labor Costs" tab in your Google Sheet.
 //
 // SOURCES:
-//  - Mexico, China, USA, Vietnam, Philippines -> TradingEconomics
-//  - Taiwan -> fxempire
+//  - Mexico, China, USA, Vietnam, Philippines, Taiwan -> TradingEconomics
 //  - Thailand -> no source link exists; always flagged for manual entry
 //
 // SETUP REQUIRED (see README.md for full steps):
@@ -43,7 +42,7 @@ const SOURCES = {
   USA: { url: 'https://tradingeconomics.com/united-states/labour-costs', unit: 'points' },
   VIETNAM: { url: 'https://tradingeconomics.com/vietnam/wages', unit: 'VND Thousand/Month' },
   PHILIPPINES: { url: 'https://tradingeconomics.com/philippines/minimum-wages', unit: 'PHP/Day' },
-  TAIWAN: { url: 'https://www.fxempire.com/macro/taiwan/labour-costs', unit: 'points' },
+  TAIWAN: { url: 'https://tradingeconomics.com/taiwan/labour-costs', unit: 'points' },
 };
 
 // -----------------------------------------------------------------------
@@ -61,30 +60,15 @@ async function scrapeTradingEconomics(page, url, unit) {
   const bodyText = await page.textContent('body');
 
   // Pattern: "... increased to X points in MONTH from Y points in MONTH of YEAR"
+  // Handles both wordings TradingEconomics uses:
+  // "increased/decreased TO X points" (value changed)
+  // "remained unchanged AT X points" (value stayed the same)
   const escapedUnit = unit.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&');
-  const pattern = new RegExp('to\\s+([\\d,\\.]+)\\s+' + escapedUnit, 'i');
+  const pattern = new RegExp('(?:to|at)\\s+([\\d,\\.]+)\\s+' + escapedUnit, 'i');
   const match = bodyText.match(pattern);
 
   if (!match) {
     throw new Error(`Pattern not found for ${url} (unit: ${unit}). Page layout may have changed.`);
-  }
-
-  const value = parseFloat(match[1].replace(/,/g, ''));
-  if (isNaN(value)) {
-    throw new Error(`Parsed value is NaN for ${url}`);
-  }
-  return value;
-}
-
-async function scrapeFxEmpire(page, url) {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
-  await page.waitForTimeout(3000);
-
-  const bodyText = await page.textContent('body');
-  const match = bodyText.match(/to\s+([\d,\.]+)\s+points/i) || bodyText.match(/([\d,\.]+)\s+points/i);
-
-  if (!match) {
-    throw new Error(`Pattern not found for ${url}. Page layout may have changed.`);
   }
 
   const value = parseFloat(match[1].replace(/,/g, ''));
@@ -204,7 +188,7 @@ async function main() {
     { key: 'USA', row: ROWS.USA, fn: () => scrapeTradingEconomics(page, SOURCES.USA.url, SOURCES.USA.unit) },
     { key: 'VIETNAM', row: ROWS.VIETNAM, fn: () => scrapeTradingEconomics(page, SOURCES.VIETNAM.url, SOURCES.VIETNAM.unit) },
     { key: 'PHILIPPINES', row: ROWS.PHILIPPINES, fn: () => scrapeTradingEconomics(page, SOURCES.PHILIPPINES.url, SOURCES.PHILIPPINES.unit) },
-    { key: 'TAIWAN', row: ROWS.TAIWAN, fn: () => scrapeFxEmpire(page, SOURCES.TAIWAN.url) },
+    { key: 'TAIWAN', row: ROWS.TAIWAN, fn: () => scrapeTradingEconomics(page, SOURCES.TAIWAN.url, SOURCES.TAIWAN.unit) },
   ];
 
   for (const task of tasks) {
