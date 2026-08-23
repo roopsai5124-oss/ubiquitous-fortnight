@@ -1,0 +1,14 @@
+{
+  "name": "labor-cost-automation",
+  "version": "1.0.0",
+  "description": "Monthly headless-browser scraper for Labor Costs tab, writes to Google Sheets via API",
+  "main": "scrape.js",
+  "scripts": {
+    "start": "node scrape.js",
+    "postinstall": "playwright install --with-deps chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.45.0",
+    "googleapis": "^140.0.0"
+  }
+}
