@@ -1,4 +1,4 @@
-name: Update Labor Costs
+name: Update Sheet (Materials + Labor)
 
 on:
   schedule:
@@ -9,7 +9,7 @@ on:
 jobs:
   scrape-and-update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -23,8 +23,9 @@ jobs:
       - name: Install dependencies (including Playwright browser)
         run: npm install
 
-      - name: Run scraper
+      - name: Run unified scraper
         env:
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-        run: node scrape.js
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: node unified-scrape.js
